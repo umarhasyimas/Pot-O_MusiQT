@@ -43,7 +43,6 @@ Supported formats include:
 - Multiple playlists using **tab-based interface**
 - Drag & drop files directly into playlists
 - Persistent playlists stored as JSON (auto-saved)
-- Reorder tracks easily
 - Copy or move tracks between playlists
 - Playlist search with debounce (responsive, non-blocking)
 

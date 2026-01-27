@@ -1,4 +1,3 @@
-```markdown
 # 🎵 Pot-O MusiQT
 
 **Pot-O MusiQT** is a lightweight yet feature-rich desktop music player built with **Python** and **PyQt5**, designed for users who want a clean interface, strong playlist control, and practical everyday playback features without unnecessary complexity.
@@ -140,4 +139,3 @@ Built with Python, PyQt5, and a love for classic desktop music players.
 
 Enjoy your music, distraction-free.  
 **Pot-O MusiQT** 🎵
-```

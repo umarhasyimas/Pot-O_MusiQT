@@ -102,6 +102,13 @@ No telemetry. No online tracking.
 
 ---
 
+## 📦 Download
+
+👉 **Download Pot-O MusiQT v1.4.2**  
+[https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v1.4.2](https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v1.4.2)
+
+---
+
 ## 📦 Installation
 1. Download the latest release from the **GitHub Releases** page
 2. Extract the archive

@@ -12,9 +12,9 @@ Pot-O MusiQT is a **local music and media player** for Windows that supports bot
 It is not a streaming client and does not require online services. Everything runs locally on your machine.
 
 The application is built on:
+- **Python** for the programming language
 - **PyQt5** for the user interface
 - **Qt Multimedia (QMediaPlayer)** for playback
-- **Mutagen** for metadata and cover-art handling
 
 The goal is simple:  
 > *A fast, controllable, no-nonsense music player that still feels modern.*
@@ -33,18 +33,19 @@ The goal is simple:
 ### 📂 Media & Format Support
 Supported formats include:
 - **Audio**: MP3, WAV, OGG, FLAC, AAC, M4A  
-- **Video**: MP4, MKV, AVI, MOV, WEBM, 3GP  
+- **Video**: MP4, MKV, AVI, MOV, WEBM, 3GP
+- **ZIP**: Open all that supported format above from a zip file. Password supported. 
 
-> Codec availability depends on your system (Windows Media Foundation).
+> Codec availability depends on your system (Windows Media Foundation). Tips: install **K-Lite Codec Pack** to expand your system audio-video playback capability. 
 
 ---
 
 ## 📑 Playlist System
 - Multiple playlists using **tab-based interface**
-- Drag & drop files directly into playlists
 - Persistent playlists stored as JSON (auto-saved)
 - Copy or move tracks between playlists
 - Playlist search with debounce (responsive, non-blocking)
+- Every search result can be your new playlist & can be saved as new M3U playlist
 
 ---
 
@@ -53,17 +54,19 @@ Supported formats include:
 - Embedded album cover extraction
 - Cover art viewer with save option
 - Track **Properties dialog** (file info, codec, bitrate, duration)
+- Embed Cover to audio-video file
+- Edit Metadata of audio-video file
+- Embed Lyrics to audio-video file
 - Rename files using metadata  
   *(Artist - Title.ext)*
+- Export your playlist into CSV & JSON file
 
 ---
 
 ## 🎼 Lyrics Viewer
 - Built-in lyrics panel
-- Automatic lyrics auto-scroll
-- Manual scrolling supported (auto-scroll pauses when user scrolls)
-- Designed to stay readable while playing
-
+- Write or Copy-Paste Lyrics & Embed them to audio file
+  
 ---
 
 ## ⌨️ Keyboard & Usability
@@ -79,7 +82,7 @@ Supported formats include:
 - Clean, modern UI with soft color palette
 - Responsive layout that adapts to window size
 - Album art + metadata layout inspired by classic desktop players
-- Optional video panel when playing video files
+- Optional video panel when playing video files (e.g. Video file downloaded from Youtube).
 - Windows taskbar integration (progress + controls)
 
 ---
@@ -111,14 +114,14 @@ No telemetry. No online tracking.
 
 ## 📦 Installation
 1. Download the latest release from the **GitHub Releases** page
-2. Extract the archive
+2. Extract the archive or just launch the executable file
 3. Run `Pot-O_MusiQT.exe`
 4. Start adding your music 🎶
 
 ---
 
 ## ⚠️ Notes & Limitations
-- Playback quality and supported codecs depend on installed system codecs
+- Playback quality and supported codecs depend on installed system codecs. Recommend to install **K-Lite Codec Pack** to expand capabilities of the audio-video playback. 
 - This player focuses on **local files**, not streaming services
 - Designed primarily for **desktop usage**, not touch-first devices
 

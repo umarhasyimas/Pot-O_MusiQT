@@ -141,7 +141,7 @@ See the repository for license details.
 ---
 
 ## ❤️ Credits
-Developed by **Muhammad Umar Hasyim Ashari**  
+Developed by **Muhammad Umar Hasyim Ashari**(https://www.superman.my.id) 
 Built with Python, PyQt5, and a love for classic desktop music players.
 
 ---

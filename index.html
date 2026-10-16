@@ -1,169 +1,376 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pot-O MusiQT v2.7.5 | Official Release</title>
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              500: '#1DB954',
-              600: '#1aa34a',
-            }
-          }
-        }
-      }
-    }
-  </script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pot-O MusiQT v2.7.5 | Offline Music Player for Desktop</title>
+<meta name="description" content="Pot-O MusiQT is a lightweight, freeware offline music player built with Python and PyQt5. Metadata editing, lyrics, M3U playlists, ZIP playback and more." />
+<style>
+  /* ===== Soft light palette: blue / grey / orange ===== */
+  :root{
+    --bg:#f3f6fa;
+    --window:#fbfcfe;
+    --panel:#eef2f7;
+    --panel-2:#e4e9f0;
+    --border:#cfd7e2;
+    --border-soft:#dde3ec;
+    --text:#2f3a48;
+    --muted:#6b7788;
+    --dim:#94a0b0;
+    --blue:#6ea8e0;
+    --blue-dark:#4a88c7;
+    --blue-soft:#dcebfa;
+    --orange:#f4a261;
+    --orange-dark:#e08a45;
+    --orange-soft:#fde9d6;
+    --mono: ui-monospace,"Cascadia Mono","SF Mono",Consolas,Menlo,monospace;
+    --sans: "Segoe UI","Inter",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);font-size:14px;line-height:1.55;color:var(--text);
+    background:
+      radial-gradient(800px 420px at 10% -5%, rgba(110,168,224,.22), transparent 60%),
+      radial-gradient(700px 420px at 95% 0%, rgba(244,162,97,.18), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--blue);color:#fff}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* ===== Window chrome ===== */
+  .window{
+    background:var(--window);border:1px solid var(--border);border-radius:8px;overflow:hidden;
+    box-shadow:0 1px 0 #fff inset,0 18px 50px rgba(60,90,130,.14);
+  }
+  .titlebar{
+    display:flex;align-items:center;gap:10px;height:34px;padding-left:12px;
+    background:linear-gradient(#f9fbfd,#e9eef5);border-bottom:1px solid var(--border);
+    font-size:12.5px;color:#46546a;user-select:none;
+  }
+  .titlebar .ico{
+    width:16px;height:16px;border-radius:4px;background:var(--orange);
+    color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center;
+  }
+  .titlebar .title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .winbtns{display:flex;height:100%}
+  .winbtns span{width:44px;display:grid;place-items:center;color:#6b7788;font-size:13px}
+  .winbtns span:hover{background:rgba(0,0,0,.05)}
+  .winbtns span.x:hover{background:#e5645a;color:#fff}
+
+  .menubar{display:flex;align-items:center;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--border);padding:2px 6px;font-size:13px}
+  .menubar a{padding:4px 12px;border-radius:3px}
+  .menubar a:hover{background:var(--blue);color:#fff}
+  .menubar .sp{flex:1}
+  .menubar .ver{color:var(--muted);font-family:var(--mono);font-size:11.5px;padding:0 8px}
+
+  .site-head{position:sticky;top:0;z-index:50;padding-top:12px;background:linear-gradient(var(--bg) 60%,rgba(243,246,250,0))}
+  .site-head .window{box-shadow:0 8px 24px rgba(60,90,130,.12)}
+
+  /* ===== Hero ===== */
+  .hero{padding:72px 0 44px;text-align:center}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;
+    background:var(--orange-soft);border:1px solid #f6cfa8;color:#b2661f;
+    padding:4px 12px;border-radius:999px;margin-bottom:22px;
+  }
+  .led{width:8px;height:8px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  h1{font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.02em;font-weight:800;color:#26323f;max-width:780px;margin:0 auto}
+  h1 em{font-style:normal;color:var(--blue-dark)}
+  .lead{margin:20px auto 0;color:var(--muted);font-size:17px;max-width:640px}
+  .lead b{color:var(--text);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;justify-content:center}
+  .chip{font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--border);padding:3px 11px;border-radius:4px;color:#556277}
+  .chip.o{background:var(--orange-soft);border-color:#f6cfa8;color:#b2661f}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;justify-content:center}
+
+  /* ===== Qt-style buttons ===== */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 20px;border-radius:5px;
+    font-weight:600;font-size:14px;color:var(--text);
+    background:linear-gradient(#ffffff,#e9eef5);border:1px solid var(--border);
+    box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(60,90,130,.10);transition:filter .12s,transform .05s;
+  }
+  .btn:hover{filter:brightness(.97);border-color:var(--blue)}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{
+    background:linear-gradient(#f8b57b,var(--orange));border-color:var(--orange-dark);color:#5a2f06;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 8px 20px rgba(244,162,97,.35);
+  }
+  .btn.primary:hover{filter:brightness(1.04);border-color:var(--orange-dark)}
+
+  /* ===== Sections ===== */
+  section{padding:44px 0}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
+  .sec-title h2{font-size:26px;font-weight:800;color:#26323f;letter-spacing:-.01em}
+  .sec-title code{font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+  /* QGroupBox */
+  .groups{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  fieldset{
+    border:1px solid var(--border);border-radius:6px;padding:26px 20px 20px;background:var(--window);
+    box-shadow:0 8px 24px rgba(60,90,130,.07);
+  }
+  fieldset legend{margin-left:10px;padding:0 8px;font-weight:600;color:#26323f;background:var(--window);font-size:13px}
+  fieldset .ic{
+    width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:20px;margin-bottom:12px;
+    background:var(--blue-soft);border:1px solid #bcd6f0;
+  }
+  fieldset:nth-child(2) .ic{background:var(--orange-soft);border-color:#f6cfa8}
+  fieldset:nth-child(3) .ic{background:var(--panel-2);border-color:var(--border)}
+  fieldset p{color:var(--muted);font-size:13.5px}
+
+  /* QTabWidget */
+  .tabs{background:var(--window);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 14px 40px rgba(60,90,130,.10)}
+  .tabbar{display:flex;flex-wrap:wrap;gap:2px;padding:8px 8px 0;background:var(--panel);border-bottom:1px solid var(--border)}
+  .tab{
+    padding:8px 16px;font-size:13px;cursor:pointer;border:1px solid var(--border);border-bottom:none;
+    border-radius:5px 5px 0 0;background:var(--panel-2);color:#5d6b7e;position:relative;top:1px;
+  }
+  .tab:hover{background:#edf1f6}
+  .tab.on{background:var(--window);color:#26323f;font-weight:600;box-shadow:inset 0 3px 0 var(--orange)}
+  .pane{display:none;padding:26px 28px;gap:32px}
+  .pane.on{display:grid;grid-template-columns:1fr 1fr}
+  .pane h4{font-size:18px;color:#26323f;margin-bottom:6px}
+  .pane .desc{color:var(--muted);font-size:13.5px}
+  .checks{list-style:none;display:grid;gap:10px}
+  .checks li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#3b4859}
+  .cb{
+    flex:none;width:17px;height:17px;margin-top:2px;border-radius:3px;background:var(--blue-soft);border:1px solid var(--blue);
+    display:grid;place-items:center;color:var(--blue-dark);font-size:12px;font-weight:900;line-height:1;
+  }
+  .fmts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .fmts span{font-family:var(--mono);font-size:12px;padding:3px 10px;border-radius:4px;background:var(--orange-soft);border:1px solid #f6cfa8;color:#b2661f}
+
+  /* QDialog */
+  .dialog{max-width:640px;margin:0 auto}
+  .dlg-body{padding:26px;display:grid;grid-template-columns:72px 1fr;gap:20px}
+  .dlg-ico{
+    width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--orange));
+    display:grid;place-items:center;font-size:36px;color:#fff;box-shadow:0 8px 20px rgba(110,168,224,.4)
+  }
+  .dlg-body h3{font-size:20px;color:#26323f}
+  .kv{margin-top:12px;display:grid;grid-template-columns:110px 1fr;gap:4px 12px;font-size:13px}
+  .kv dt{color:var(--dim)} .kv dd{color:#3b4859;font-family:var(--mono);font-size:12.5px}
+  .dlg-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding:14px 20px;background:var(--panel);border-top:1px solid var(--border)}
+
+  /* QStatusBar */
+  footer{padding:20px 0 44px}
+  .statusbar{
+    display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:8px 14px;font-size:12px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);
+  }
+  .statusbar .r{margin-left:auto}
+  .statusbar .dot{color:var(--orange)}
+  .credit{margin-top:14px;text-align:center;color:var(--muted);font-size:12.5px}
+  .credit a{color:var(--blue-dark)} .credit a:hover{text-decoration:underline}
+
+  @media (max-width:860px){
+    .groups{grid-template-columns:1fr}
+    .pane.on{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .hero{padding-top:48px}
+    .winbtns span{width:34px}
+    .menubar .ver{display:none}
+    .dlg-body{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-black">
+<body>
 
-  <!-- Header / Navigation -->
-  <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center font-bold text-slate-950 text-lg">
-          ♪
-        </div>
-        <span class="font-bold text-lg tracking-tight">Pot-O MusiQT</span>
+<!-- ===== Site header as window title + menu bar ===== -->
+<div class="site-head">
+  <div class="wrap">
+    <div class="window">
+      <div class="titlebar">
+        <div class="ico">♪</div>
+        <div class="title">Pot-O MusiQT v2.7.5 — Official Release</div>
+        <div class="winbtns"><span>—</span><span>▢</span><span class="x">✕</span></div>
       </div>
-      <a href="https://github.com/umarhasyimas/Pot-O_MusiQT" target="_blank" rel="noopener noreferrer" 
-         class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub Release
-      </a>
+      <nav class="menubar" aria-label="Main">
+        <a href="#top">Home</a>
+        <a href="#about">About</a>
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="https://github.com/umarhasyimas/Pot-O_MusiQT" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="sp"></span>
+        <span class="ver">Python · PyQt5 · Freeware</span>
+      </nav>
     </div>
-  </header>
+  </div>
+</div>
 
-  <!-- Hero Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 text-center">
-    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 border border-brand-500/20 text-xs font-semibold uppercase tracking-wider mb-6">
-      <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
-      Version 2.7.5 Released
-    </span>
-    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-3xl mx-auto leading-tight">
-      Elevate Your Offline Audio with <span class="text-brand-500">Pot-O MusiQT</span>
-    </h1>
-    <p class="mt-6 text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-      A lightweight, feature-rich desktop music player created by <strong>Muhammad Umar Hasyim Ashari</strong>. Built natively using <strong>Python and PyQt5 (Qt)</strong> for high performance, smart playlist control, and practical everyday music management.
+<main class="wrap" id="top">
+
+  <!-- ===== Hero ===== -->
+  <div class="hero">
+    <div class="badge"><span class="led"></span> Version 2.7.5 released</div>
+    <h1>Elevate your offline audio with <em>Pot-O MusiQT</em></h1>
+    <p class="lead">
+      A lightweight, feature-rich desktop music player created by <b>Muhammad Umar Hasyim Ashari</b>.
+      Built natively with <b>Python and PyQt5 (Qt)</b> for high performance, smart playlist control
+      and practical everyday music management.
     </p>
-
-    <!-- Tech Stack Tags -->
-    <div class="mt-4 flex items-center justify-center gap-2 text-xs font-mono text-slate-400">
-      <span class="bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">Python</span>
-      <span class="bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">PyQt5 (Qt Framework)</span>
-      <span class="bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">Freeware</span>
+    <div class="chips">
+      <span class="chip">Python</span>
+      <span class="chip">PyQt5 (Qt Framework)</span>
+      <span class="chip o">Freeware</span>
     </div>
-
-    <!-- CTAs -->
-    <div class="mt-10 flex flex-wrap justify-center items-center gap-4">
-      <a href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.7.5" target="_blank" rel="noopener noreferrer" 
-         class="px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold rounded-lg transition-all shadow-lg shadow-brand-500/20 flex items-center gap-2">
-        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        Download Pot-O MusiQT v2.7.5
-      </a>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.7.5" target="_blank" rel="noopener noreferrer">⬇ Download Pot-O MusiQT v2.7.5</a>
+      <a class="btn" href="#features">Explore features</a>
     </div>
-  </section>
+  </div>
 
-  <!-- Core Highlights Grid -->
-  <section class="max-w-6xl mx-auto px-6 py-10">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="p-6 bg-slate-900/60 border border-slate-800/80 rounded-xl">
-        <div class="w-10 h-10 bg-slate-800 text-brand-500 rounded-lg flex items-center justify-center font-bold text-xl mb-4">
-          🐍
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">Python & PyQt5 Powered</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Built using Python and PyQt5 (Qt platform) for efficient, desktop-native performance with zero bloat.
-        </p>
-      </div>
-
-      <div class="p-6 bg-slate-900/60 border border-slate-800/80 rounded-xl">
-        <div class="w-10 h-10 bg-slate-800 text-brand-500 rounded-lg flex items-center justify-center font-bold text-xl mb-4">
-          🛡️
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">100% Offline & Lightweight</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Runs completely offline without internet dependence. Ultra-low RAM and CPU resource consumption.
-        </p>
-      </div>
-
-      <div class="p-6 bg-slate-900/60 border border-slate-800/80 rounded-xl">
-        <div class="w-10 h-10 bg-slate-800 text-brand-500 rounded-lg flex items-center justify-center font-bold text-xl mb-4">
-          🏷️
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">Metadata & Lyrics Suite</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          Full metadata editing, album cover management, file renaming, and embedded lyrics display.
-        </p>
-      </div>
+  <!-- ===== Highlights (QGroupBox) ===== -->
+  <section id="about">
+    <div class="sec-title"><h2>Why Pot-O MusiQT</h2><code>QGroupBox</code></div>
+    <div class="groups">
+      <fieldset>
+        <legend>Python &amp; PyQt5</legend>
+        <div class="ic">🐍</div>
+        <p>Built using Python and PyQt5 (the Qt platform) for efficient, desktop-native performance with zero bloat.</p>
+      </fieldset>
+      <fieldset>
+        <legend>100% Offline &amp; Lightweight</legend>
+        <div class="ic">🛡</div>
+        <p>Runs completely offline without internet dependence, with ultra-low RAM and CPU resource consumption.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Metadata &amp; Lyrics Suite</legend>
+        <div class="ic">🏷</div>
+        <p>Full metadata editing, album cover management, file renaming and embedded lyrics display.</p>
+      </fieldset>
     </div>
   </section>
 
-  <!-- Full Feature Set Section -->
-  <section class="max-w-6xl mx-auto px-6 py-12">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-10">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 text-center">Complete Feature Set</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-slate-300">
-        
-        <div class="space-y-3">
-          <h4 class="text-brand-500 font-bold uppercase tracking-wider text-xs">Playback & Formats</h4>
-          <ul class="space-y-2 text-sm">
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> High-quality audio playback (MP3, FLAC, AAC, M4V, OGG, WAV, etc.)</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Direct video clip playback support</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Open and play audio archives directly from ZIP files</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Support for running multiple instances simultaneously</li>
-          </ul>
-        </div>
+  <!-- ===== Features (QTabWidget) ===== -->
+  <section id="features">
+    <div class="sec-title"><h2>Complete feature set</h2><code>QTabWidget</code></div>
+    <div class="tabs">
+      <div class="tabbar" role="tablist">
+        <div class="tab on" role="tab" data-t="0" tabindex="0">Playback &amp; Formats</div>
+        <div class="tab" role="tab" data-t="1" tabindex="0">Playlists &amp; Library</div>
+        <div class="tab" role="tab" data-t="2" tabindex="0">Metadata &amp; Lyrics</div>
+        <div class="tab" role="tab" data-t="3" tabindex="0">Design &amp; Experience</div>
+      </div>
 
-        <div class="space-y-3">
-          <h4 class="text-brand-500 font-bold uppercase tracking-wider text-xs">Playlist & Library Management</h4>
-          <ul class="space-y-2 text-sm">
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> JSON-backed state management</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Save and load standard M3U playlists</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Export playlists directly to CSV and JSON formats</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Search by metadata & filenames to generate instant new playlists</li>
-          </ul>
+      <div class="pane on">
+        <div>
+          <h4>Play almost anything</h4>
+          <p class="desc">High-quality audio playback across common formats, plus video clips and audio straight from ZIP archives.</p>
+          <div class="fmts"><span>MP3</span><span>FLAC</span><span>AAC</span><span>M4V</span><span>OGG</span><span>WAV</span><span>+ more</span></div>
         </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span>High-quality audio playback (MP3, FLAC, AAC, M4V, OGG, WAV, etc.)</li>
+          <li><span class="cb">✓</span>Direct video clip playback support</li>
+          <li><span class="cb">✓</span>Open and play audio archives directly from ZIP files</li>
+          <li><span class="cb">✓</span>Support for running multiple instances simultaneously</li>
+        </ul>
+      </div>
 
-        <div class="space-y-3">
-          <h4 class="text-brand-500 font-bold uppercase tracking-wider text-xs">Metadata & Lyrics Tools</h4>
-          <ul class="space-y-2 text-sm">
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Edit audio metadata tags & album art covers</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Embed and view synchronized or plain lyrics</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Batch rename media files based on metadata tags</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Safe local file management operations</li>
-          </ul>
+      <div class="pane">
+        <div>
+          <h4>Playlists that stay yours</h4>
+          <p class="desc">Standard formats in, standard formats out. Search your metadata and filenames to create a new playlist instantly.</p>
         </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span>JSON-backed state management</li>
+          <li><span class="cb">✓</span>Save and load standard M3U playlists</li>
+          <li><span class="cb">✓</span>Export playlists directly to CSV and JSON formats</li>
+          <li><span class="cb">✓</span>Search by metadata &amp; filenames to generate instant new playlists</li>
+        </ul>
+      </div>
 
-        <div class="space-y-3">
-          <h4 class="text-brand-500 font-bold uppercase tracking-wider text-xs">Design & Experience</h4>
-          <ul class="space-y-2 text-sm">
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Clean, user-friendly UI/UX designed for fast interactions</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Keyboard-friendly shortcuts and controls</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Freeware software model</li>
-            <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Lightweight system footprint (low CPU & RAM usage)</li>
-          </ul>
+      <div class="pane">
+        <div>
+          <h4>A tag editor built in</h4>
+          <p class="desc">Fix tags, swap covers, add lyrics and tidy filenames without leaving the player.</p>
         </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span>Edit audio metadata tags &amp; album art covers</li>
+          <li><span class="cb">✓</span>Embed and view synchronized or plain lyrics</li>
+          <li><span class="cb">✓</span>Batch rename media files based on metadata tags</li>
+          <li><span class="cb">✓</span>Safe local file management operations</li>
+        </ul>
+      </div>
 
+      <div class="pane">
+        <div>
+          <h4>Fast, light, familiar</h4>
+          <p class="desc">A clean interface designed for quick interactions and a small system footprint.</p>
+        </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span>Clean, user-friendly UI/UX designed for fast interactions</li>
+          <li><span class="cb">✓</span>Keyboard-friendly shortcuts and controls</li>
+          <li><span class="cb">✓</span>Freeware software model</li>
+          <li><span class="cb">✓</span>Lightweight system footprint (low CPU &amp; RAM usage)</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800 py-10 bg-slate-950 text-center text-sm text-slate-500">
-    <div class="max-w-6xl mx-auto px-6">
-      <p>Pot-O MusiQT is created and developed by <strong class="text-slate-300">Muhammad Umar Hasyim Ashari [Clark Asakura El]</strong> (<a href="https://github.com/umarhasyimas" class="text-brand-500 hover:underline">@umarhasyimas</a>).</p>
-      <p class="mt-2 text-xs text-slate-600">Freeware Software • Built with Python & PyQt5 • Hosted on Cloudflare Pages</p>
+  <!-- ===== Download (QDialog) ===== -->
+  <section id="download">
+    <div class="sec-title"><h2>Get it</h2><code>QDialog</code></div>
+    <div class="window dialog">
+      <div class="titlebar">
+        <div class="ico">♪</div>
+        <div class="title">Download Pot-O MusiQT</div>
+        <div class="winbtns"><span class="x">✕</span></div>
+      </div>
+      <div class="dlg-body">
+        <div class="dlg-ico">♪</div>
+        <div>
+          <h3>Pot-O MusiQT v2.7.5</h3>
+          <p style="color:var(--muted);font-size:13.5px;margin-top:2px">Free offline music player for your desktop.</p>
+          <dl class="kv">
+            <dt>Version</dt><dd>2.7.5</dd>
+            <dt>License</dt><dd>Freeware</dd>
+            <dt>Built with</dt><dd>Python · PyQt5 (Qt)</dd>
+            <dt>Author</dt><dd>Muhammad Umar Hasyim Ashari</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="dlg-foot">
+        <a class="btn" href="https://github.com/umarhasyimas/Pot-O_MusiQT" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+        <a class="btn primary" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.7.5" target="_blank" rel="noopener noreferrer">⬇ Download</a>
+      </div>
     </div>
-  </footer>
+  </section>
+</main>
 
+<!-- ===== Footer as status bar ===== -->
+<footer class="wrap">
+  <div class="statusbar">
+    <span><span class="dot">●</span> Ready</span>
+    <span>v2.7.5</span>
+    <span>Freeware</span>
+    <span class="r">Built with Python &amp; PyQt5 · Hosted on Cloudflare Pages</span>
+  </div>
+  <p class="credit">
+    Pot-O MusiQT is created and developed by <strong style="color:#46546a">Muhammad Umar Hasyim Ashari [Clark Asakura El]</strong>
+    (<a href="https://github.com/umarhasyimas" target="_blank" rel="noopener noreferrer">@umarhasyimas</a>).
+  </p>
+</footer>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll(".tab"), panes=document.querySelectorAll(".pane");
+  function showTab(i){
+    tabs.forEach(function(t,k){t.classList.toggle("on",k===i);t.setAttribute("aria-selected",k===i)});
+    panes.forEach(function(p,k){p.classList.toggle("on",k===i)});
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener("click",function(){showTab(i)});
+    t.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();showTab(i)}});
+  });
+})();
+</script>
 </body>
 </html>

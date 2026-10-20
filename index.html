@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pot-O MusiQT v2.7.5 | Offline Music Player for Desktop</title>
-<meta name="description" content="Pot-O MusiQT is a lightweight, freeware offline music player built with Python and PyQt5. Metadata editing, lyrics, M3U playlists, ZIP playback and more." />
+<title>Pot-O MusiQT v2.8.2 "Verse" | Offline Music Player for Windows</title>
+<meta name="description" content="Pot-O MusiQT is a lightweight, freeware offline music player built with Python and PyQt5, powered by the BASS audio engine. Crossfade, volume normalization, 10/15-band equalizer, favorites, watch folders, themes and a mini player." />
 <style>
   /* ===== Soft light palette: blue / grey / orange ===== */
   :root{
@@ -13,7 +13,6 @@
     --panel:#eef2f7;
     --panel-2:#e4e9f0;
     --border:#cfd7e2;
-    --border-soft:#dde3ec;
     --text:#2f3a48;
     --muted:#6b7788;
     --dim:#94a0b0;
@@ -42,31 +41,30 @@
 
   /* ===== Window chrome ===== */
   .window{
-    background:var(--window);border:1px solid var(--border);border-radius:8px;overflow:hidden;
+    background:var(--window);border:1px solid var(--border);border-radius:8px;
     box-shadow:0 1px 0 #fff inset,0 18px 50px rgba(60,90,130,.14);
   }
+  .window.clip{overflow:hidden}
   .titlebar{
-    display:flex;align-items:center;gap:10px;height:34px;padding-left:12px;
+    display:flex;align-items:center;gap:10px;height:34px;padding-left:12px;border-radius:8px 8px 0 0;
     background:linear-gradient(#f9fbfd,#e9eef5);border-bottom:1px solid var(--border);
     font-size:12.5px;color:#46546a;user-select:none;
   }
-  .titlebar .ico{
-    width:16px;height:16px;border-radius:4px;background:var(--orange);
-    color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center;
-  }
+  .titlebar .ico{width:16px;height:16px;border-radius:4px;background:var(--orange);color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center}
   .titlebar .title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .winbtns{display:flex;height:100%}
   .winbtns span{width:44px;display:grid;place-items:center;color:#6b7788;font-size:13px}
   .winbtns span:hover{background:rgba(0,0,0,.05)}
+  .winbtns span.x{border-top-right-radius:8px}
   .winbtns span.x:hover{background:#e5645a;color:#fff}
 
-  .menubar{display:flex;align-items:center;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--border);padding:2px 6px;font-size:13px}
+  .menubar{display:flex;align-items:center;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--border);padding:2px 6px;font-size:13px;border-radius:0 0 8px 8px}
   .menubar a{padding:4px 12px;border-radius:3px}
   .menubar a:hover{background:var(--blue);color:#fff}
   .menubar .sp{flex:1}
   .menubar .ver{color:var(--muted);font-family:var(--mono);font-size:11.5px;padding:0 8px}
 
-  .site-head{position:sticky;top:0;z-index:50;padding-top:12px;background:linear-gradient(var(--bg) 60%,rgba(243,246,250,0))}
+  .site-head{position:sticky;top:0;z-index:60;padding-top:12px;background:linear-gradient(var(--bg) 60%,rgba(243,246,250,0))}
   .site-head .window{box-shadow:0 8px 24px rgba(60,90,130,.12)}
 
   /* ===== Hero ===== */
@@ -78,35 +76,70 @@
   }
   .led{width:8px;height:8px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
   @keyframes pulse{50%{opacity:.35}}
-  h1{font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.02em;font-weight:800;color:#26323f;max-width:780px;margin:0 auto}
+  h1{font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.02em;font-weight:800;color:#26323f;max-width:800px;margin:0 auto}
   h1 em{font-style:normal;color:var(--blue-dark)}
-  .lead{margin:20px auto 0;color:var(--muted);font-size:17px;max-width:640px}
+  .lead{margin:20px auto 0;color:var(--muted);font-size:17px;max-width:660px}
   .lead b{color:var(--text);font-weight:600}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;justify-content:center}
   .chip{font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--border);padding:3px 11px;border-radius:4px;color:#556277}
   .chip.o{background:var(--orange-soft);border-color:#f6cfa8;color:#b2661f}
-  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;justify-content:center}
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;justify-content:center;align-items:flex-start}
+  .hint{margin-top:14px;color:var(--dim);font-size:12.5px;font-family:var(--mono)}
 
   /* ===== Qt-style buttons ===== */
   .btn{
     display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 20px;border-radius:5px;
-    font-weight:600;font-size:14px;color:var(--text);
+    font-weight:600;font-size:14px;color:var(--text);font-family:inherit;
     background:linear-gradient(#ffffff,#e9eef5);border:1px solid var(--border);
     box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(60,90,130,.10);transition:filter .12s,transform .05s;
   }
   .btn:hover{filter:brightness(.97);border-color:var(--blue)}
   .btn:active{transform:translateY(1px)}
-  .btn.primary{
-    background:linear-gradient(#f8b57b,var(--orange));border-color:var(--orange-dark);color:#5a2f06;
-    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 8px 20px rgba(244,162,97,.35);
+
+  /* ===== Split download button with dropdown (VLC-style) ===== */
+  .dl{position:relative;display:inline-block;text-align:left}
+  .dl-split{display:flex;border-radius:6px;box-shadow:0 10px 26px rgba(244,162,97,.38)}
+  .dl-main,.dl-toggle{
+    border:1px solid var(--orange-dark);cursor:pointer;font-family:inherit;color:#5a2f06;
+    background:linear-gradient(#f8b57b,var(--orange));box-shadow:0 1px 0 rgba(255,255,255,.5) inset;
   }
-  .btn.primary:hover{filter:brightness(1.04);border-color:var(--orange-dark)}
+  .dl-main{
+    display:flex;align-items:center;gap:14px;padding:11px 22px 11px 18px;border-radius:6px 0 0 6px;border-right:1px solid rgba(138,72,16,.35);
+  }
+  .dl-main .big{font-size:16px;font-weight:700;line-height:1.2;display:block}
+  .dl-main .small{font-size:11.5px;opacity:.8;display:block;font-family:var(--mono)}
+  .dl-main .arrow{font-size:22px;line-height:1}
+  .dl-toggle{width:46px;border-radius:0 6px 6px 0;display:grid;place-items:center;font-size:12px}
+  .dl-main:hover,.dl-toggle:hover{filter:brightness(1.05)}
+  .dl-toggle .chev{transition:transform .15s}
+  .dl.open .chev{transform:rotate(180deg)}
+
+  .dl-menu{
+    display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:80;min-width:340px;
+    background:var(--window);border:1px solid var(--border);border-radius:8px;padding:6px;
+    box-shadow:0 20px 50px rgba(60,90,130,.25);
+  }
+  .dl.open .dl-menu{display:block}
+  .dl.up .dl-menu{top:auto;bottom:calc(100% + 8px)}
+  .dl.right .dl-menu{left:auto;right:0}
+  .dl-menu h6{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px 4px}
+  .dl-menu a{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:5px}
+  .dl-menu a:hover,.dl-menu a:focus-visible{background:var(--blue-soft);outline:none}
+  .dl-menu .mi{width:34px;height:34px;border-radius:7px;flex:none;display:grid;place-items:center;font-size:12px;font-weight:800;font-family:var(--mono);background:var(--blue-soft);color:var(--blue-dark);border:1px solid #bcd6f0}
+  .dl-menu a.o .mi{background:var(--orange-soft);color:#b2661f;border-color:#f6cfa8}
+  .dl-menu a.g .mi{background:var(--panel-2);color:#5d6b7e;border-color:var(--border)}
+  .dl-menu .mt{flex:1;min-width:0}
+  .dl-menu .mt b{display:block;font-size:13.5px;color:#26323f;font-weight:600}
+  .dl-menu .mt span{display:block;font-size:12px;color:var(--muted)}
+  .dl-menu .sz{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .dl-menu hr{border:0;border-top:1px solid var(--border);margin:6px 4px}
 
   /* ===== Sections ===== */
   section{padding:44px 0}
-  .sec-title{display:flex;align-items:baseline;gap:12px;margin-bottom:22px}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
   .sec-title h2{font-size:26px;font-weight:800;color:#26323f;letter-spacing:-.01em}
   .sec-title code{font-family:var(--mono);font-size:12px;color:var(--dim)}
+  .sec-sub{color:var(--muted);margin-bottom:22px;max-width:680px}
 
   /* QGroupBox */
   .groups{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
@@ -115,12 +148,9 @@
     box-shadow:0 8px 24px rgba(60,90,130,.07);
   }
   fieldset legend{margin-left:10px;padding:0 8px;font-weight:600;color:#26323f;background:var(--window);font-size:13px}
-  fieldset .ic{
-    width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:20px;margin-bottom:12px;
-    background:var(--blue-soft);border:1px solid #bcd6f0;
-  }
-  fieldset:nth-child(2) .ic{background:var(--orange-soft);border-color:#f6cfa8}
-  fieldset:nth-child(3) .ic{background:var(--panel-2);border-color:var(--border)}
+  fieldset .ic{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:20px;margin-bottom:12px;background:var(--blue-soft);border:1px solid #bcd6f0}
+  fieldset:nth-child(3n+2) .ic{background:var(--orange-soft);border-color:#f6cfa8}
+  fieldset:nth-child(3n) .ic{background:var(--panel-2);border-color:var(--border)}
   fieldset p{color:var(--muted);font-size:13.5px}
 
   /* QTabWidget */
@@ -133,11 +163,12 @@
   .tab:hover{background:#edf1f6}
   .tab.on{background:var(--window);color:#26323f;font-weight:600;box-shadow:inset 0 3px 0 var(--orange)}
   .pane{display:none;padding:26px 28px;gap:32px}
-  .pane.on{display:grid;grid-template-columns:1fr 1fr}
+  .pane.on{display:grid;grid-template-columns:.85fr 1.15fr}
   .pane h4{font-size:18px;color:#26323f;margin-bottom:6px}
   .pane .desc{color:var(--muted);font-size:13.5px}
-  .checks{list-style:none;display:grid;gap:10px}
+  .checks{list-style:none;display:grid;gap:10px;align-content:start}
   .checks li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#3b4859}
+  .checks li b{color:#26323f;font-weight:600}
   .cb{
     flex:none;width:17px;height:17px;margin-top:2px;border-radius:3px;background:var(--blue-soft);border:1px solid var(--blue);
     display:grid;place-items:center;color:var(--blue-dark);font-size:12px;font-weight:900;line-height:1;
@@ -145,38 +176,41 @@
   .fmts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
   .fmts span{font-family:var(--mono);font-size:12px;padding:3px 10px;border-radius:4px;background:var(--orange-soft);border:1px solid #f6cfa8;color:#b2661f}
 
+  /* Themes swatches */
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .swatches span{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel)}
+
   /* QDialog */
-  .dialog{max-width:640px;margin:0 auto}
+  .dialog{max-width:680px;margin:0 auto}
   .dlg-body{padding:26px;display:grid;grid-template-columns:72px 1fr;gap:20px}
-  .dlg-ico{
-    width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--orange));
-    display:grid;place-items:center;font-size:36px;color:#fff;box-shadow:0 8px 20px rgba(110,168,224,.4)
-  }
+  .dlg-ico{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--orange));display:grid;place-items:center;font-size:36px;color:#fff;box-shadow:0 8px 20px rgba(110,168,224,.4)}
   .dlg-body h3{font-size:20px;color:#26323f}
-  .kv{margin-top:12px;display:grid;grid-template-columns:110px 1fr;gap:4px 12px;font-size:13px}
-  .kv dt{color:var(--dim)} .kv dd{color:#3b4859;font-family:var(--mono);font-size:12.5px}
-  .dlg-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding:14px 20px;background:var(--panel);border-top:1px solid var(--border)}
+  .kv{margin-top:12px;display:grid;grid-template-columns:120px 1fr;gap:4px 12px;font-size:13px}
+  .kv dt{color:var(--dim)} .kv dd{color:#3b4859;font-family:var(--mono);font-size:12.5px;word-break:break-all}
+  .dlg-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;padding:14px 20px;background:var(--panel);border-top:1px solid var(--border);border-radius:0 0 8px 8px}
+  .dlg-foot .dl-split{box-shadow:0 6px 16px rgba(244,162,97,.3)}
 
   /* QStatusBar */
   footer{padding:20px 0 44px}
-  .statusbar{
-    display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:8px 14px;font-size:12px;color:var(--muted);
-    background:var(--panel);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);
-  }
+  .statusbar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:8px 14px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:6px;font-family:var(--mono)}
   .statusbar .r{margin-left:auto}
   .statusbar .dot{color:var(--orange)}
   .credit{margin-top:14px;text-align:center;color:var(--muted);font-size:12.5px}
   .credit a{color:var(--blue-dark)} .credit a:hover{text-decoration:underline}
 
   @media (max-width:860px){
-    .groups{grid-template-columns:1fr}
+    .groups{grid-template-columns:1fr 1fr}
     .pane.on{grid-template-columns:1fr}
   }
   @media (max-width:560px){
+    .groups{grid-template-columns:1fr}
     .hero{padding-top:48px}
     .winbtns span{width:34px}
     .menubar .ver{display:none}
     .dlg-body{grid-template-columns:1fr}
+    .dl-menu{min-width:min(340px,calc(100vw - 40px))}
+    .dl.right .dl-menu{right:auto;left:0}
+    .kv{grid-template-columns:1fr}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
@@ -186,20 +220,20 @@
 <!-- ===== Site header as window title + menu bar ===== -->
 <div class="site-head">
   <div class="wrap">
-    <div class="window">
+    <div class="window clip">
       <div class="titlebar">
         <div class="ico">♪</div>
-        <div class="title">Pot-O MusiQT v2.7.5 — Official Release</div>
+        <div class="title">Pot-O MusiQT v2.8.2 "Verse" — Official Release</div>
         <div class="winbtns"><span>—</span><span>▢</span><span class="x">✕</span></div>
       </div>
       <nav class="menubar" aria-label="Main">
         <a href="#top">Home</a>
-        <a href="#about">About</a>
+        <a href="#new">What's new</a>
         <a href="#features">Features</a>
         <a href="#download">Download</a>
         <a href="https://github.com/umarhasyimas/Pot-O_MusiQT" target="_blank" rel="noopener noreferrer">GitHub</a>
         <span class="sp"></span>
-        <span class="ver">Python · PyQt5 · Freeware</span>
+        <span class="ver">Python · PyQt5 · BASS · Freeware</span>
       </nav>
     </div>
   </div>
@@ -209,42 +243,93 @@
 
   <!-- ===== Hero ===== -->
   <div class="hero">
-    <div class="badge"><span class="led"></span> Version 2.7.5 released</div>
+    <div class="badge"><span class="led"></span> Version 2.8.2 "Verse" released</div>
     <h1>Elevate your offline audio with <em>Pot-O MusiQT</em></h1>
     <p class="lead">
       A lightweight, feature-rich desktop music player created by <b>Muhammad Umar Hasyim Ashari</b>.
-      Built natively with <b>Python and PyQt5 (Qt)</b> for high performance, smart playlist control
-      and practical everyday music management.
+      Built with <b>Python and PyQt5 (Qt)</b> and powered by the <b>BASS audio engine</b> — now with crossfade,
+      volume normalization, 10/15-band equalizers, favorites, watch folders, themes and a mini player.
     </p>
     <div class="chips">
       <span class="chip">Python</span>
       <span class="chip">PyQt5 (Qt Framework)</span>
+      <span class="chip">BASS audio engine</span>
       <span class="chip o">Freeware</span>
     </div>
+
     <div class="cta">
-      <a class="btn primary" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.7.5" target="_blank" rel="noopener noreferrer">⬇ Download Pot-O MusiQT v2.7.5</a>
-      <a class="btn" href="#features">Explore features</a>
+      <!-- Download dropdown -->
+      <div class="dl" data-dl>
+        <div class="dl-split">
+          <a class="dl-main" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x64.exe" rel="noopener noreferrer">
+            <span class="arrow">⬇</span>
+            <span><span class="big">Download Pot-O MusiQT</span><span class="small">v2.8.2 · Windows 64-bit</span></span>
+          </a>
+          <button class="dl-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Show other downloads"><span class="chev">▼</span></button>
+        </div>
+        <div class="dl-menu" role="menu">
+          <h6>Windows installer</h6>
+          <a role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x64.exe" rel="noopener noreferrer">
+            <span class="mi">x64</span><span class="mt"><b>Windows 64-bit</b><span>PotOMusiQT_Setup_2.8.2_x64.exe</span></span><span class="sz">45.8 MB</span>
+          </a>
+          <a role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x86.exe" rel="noopener noreferrer">
+            <span class="mi">x86</span><span class="mt"><b>Windows 32-bit</b><span>PotOMusiQT_Setup_2.8.2_x86.exe</span></span><span class="sz">39 MB</span>
+          </a>
+          <hr>
+          <h6>More</h6>
+          <a class="o" role="menuitem" href="https://sourceforge.net/projects/pot-o-musiqt/files/v2.8.2/" target="_blank" rel="noopener noreferrer">
+            <span class="mi">SF</span><span class="mt"><b>SourceForge mirror</b><span>Download from SourceForge</span></span>
+          </a>
+          <a class="g" role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/archive/refs/tags/v2.8.2.zip" rel="noopener noreferrer">
+            <span class="mi">ZIP</span><span class="mt"><b>Source code (zip)</b><span>v2.8.2</span></span>
+          </a>
+          <a class="g" role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/archive/refs/tags/v2.8.2.tar.gz" rel="noopener noreferrer">
+            <span class="mi">TAR</span><span class="mt"><b>Source code (tar.gz)</b><span>v2.8.2</span></span>
+          </a>
+          <a class="g" role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.8.2" target="_blank" rel="noopener noreferrer">
+            <span class="mi">GH</span><span class="mt"><b>Release notes on GitHub</b><span>Changelog &amp; all assets</span></span>
+          </a>
+        </div>
+      </div>
+      <a class="btn" href="#features" style="height:62px">Explore features</a>
     </div>
+    <p class="hint">Free · Offline · Windows 64-bit &amp; 32-bit installers</p>
   </div>
 
-  <!-- ===== Highlights (QGroupBox) ===== -->
-  <section id="about">
-    <div class="sec-title"><h2>Why Pot-O MusiQT</h2><code>QGroupBox</code></div>
+  <!-- ===== What's new ===== -->
+  <section id="new">
+    <div class="sec-title"><h2>What's new in 2.8.2 "Verse"</h2><code>QGroupBox</code></div>
+    <p class="sec-sub">A big step up from 2.7.5, with a reworked playback engine built around BASS mixer streams.</p>
     <div class="groups">
       <fieldset>
-        <legend>Python &amp; PyQt5</legend>
-        <div class="ic">🐍</div>
-        <p>Built using Python and PyQt5 (the Qt platform) for efficient, desktop-native performance with zero bloat.</p>
+        <legend>Crossfade &amp; Gapless</legend>
+        <div class="ic">🔀</div>
+        <p>Smooth crossfade between tracks with its own menu, plus gapless playback that pre-loads the next song.</p>
       </fieldset>
       <fieldset>
-        <legend>100% Offline &amp; Lightweight</legend>
-        <div class="ic">🛡</div>
-        <p>Runs completely offline without internet dependence, with ultra-low RAM and CPU resource consumption.</p>
+        <legend>Volume Normalization</legend>
+        <div class="ic">📏</div>
+        <p>ReplayGain-style analysis cached to disk, with a selectable target level and a command to clear the cache.</p>
       </fieldset>
       <fieldset>
-        <legend>Metadata &amp; Lyrics Suite</legend>
-        <div class="ic">🏷</div>
-        <p>Full metadata editing, album cover management, file renaming and embedded lyrics display.</p>
+        <legend>8, 10 &amp; 15-band EQ</legend>
+        <div class="ic">🎛</div>
+        <p>Three equalizer layouts, presets, save and load, plus automatic preset selection per track by genre or audio fingerprint.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Favorites</legend>
+        <div class="ic">★</div>
+        <p>Per-track favorite button, a Favorites tab that always stays first, and a quick Favorite button on Now Playing.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Watch Folders</legend>
+        <div class="ic">📁</div>
+        <p>Auto-sync folders into your playlists, with background missing-track detection that never blocks the UI.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Themes &amp; Mini Player</legend>
+        <div class="ic">🎨</div>
+        <p>Live theme switching with Default, Midnight and Aurora, drop-in JSON themes, and a small Winamp-style mini player.</p>
       </fieldset>
     </div>
   </section>
@@ -252,64 +337,112 @@
   <!-- ===== Features (QTabWidget) ===== -->
   <section id="features">
     <div class="sec-title"><h2>Complete feature set</h2><code>QTabWidget</code></div>
+    <p class="sec-sub">Everything built into Pot-O MusiQT v2.8.2.</p>
     <div class="tabs">
       <div class="tabbar" role="tablist">
-        <div class="tab on" role="tab" data-t="0" tabindex="0">Playback &amp; Formats</div>
-        <div class="tab" role="tab" data-t="1" tabindex="0">Playlists &amp; Library</div>
-        <div class="tab" role="tab" data-t="2" tabindex="0">Metadata &amp; Lyrics</div>
-        <div class="tab" role="tab" data-t="3" tabindex="0">Design &amp; Experience</div>
+        <div class="tab on" role="tab" tabindex="0">Audio Engine</div>
+        <div class="tab" role="tab" tabindex="0">Equalizer &amp; Visualizer</div>
+        <div class="tab" role="tab" tabindex="0">Playlists &amp; Library</div>
+        <div class="tab" role="tab" tabindex="0">Metadata &amp; Lyrics</div>
+        <div class="tab" role="tab" tabindex="0">Themes &amp; UI</div>
+        <div class="tab" role="tab" tabindex="0">Windows &amp; Session</div>
       </div>
 
       <div class="pane on">
         <div>
-          <h4>Play almost anything</h4>
-          <p class="desc">High-quality audio playback across common formats, plus video clips and audio straight from ZIP archives.</p>
-          <div class="fmts"><span>MP3</span><span>FLAC</span><span>AAC</span><span>M4V</span><span>OGG</span><span>WAV</span><span>+ more</span></div>
+          <h4>Powered by BASS</h4>
+          <p class="desc">Low-latency, rock-solid playback built around BASS mixer streams (BASSmix) for smooth transitions.</p>
+          <div class="fmts"><span>MP3</span><span>WAV</span><span>OGG</span><span>FLAC</span><span>M4A</span><span>AAC</span></div>
         </div>
         <ul class="checks">
-          <li><span class="cb">✓</span>High-quality audio playback (MP3, FLAC, AAC, M4V, OGG, WAV, etc.)</li>
-          <li><span class="cb">✓</span>Direct video clip playback support</li>
-          <li><span class="cb">✓</span>Open and play audio archives directly from ZIP files</li>
-          <li><span class="cb">✓</span>Support for running multiple instances simultaneously</li>
+          <li><span class="cb">✓</span><span><b>Gapless playback</b> pre-loads the next track for zero silence between songs</span></li>
+          <li><span class="cb">✓</span><span><b>Crossfade</b> between tracks, with a dedicated Crossfade menu</span></li>
+          <li><span class="cb">✓</span><span><b>Volume normalization</b> with cached analysis and a selectable target level</span></li>
+          <li><span class="cb">✓</span><span><b>Pitch control</b> from -12 to +12 semitones in 0.5 steps</span></li>
+          <li><span class="cb">✓</span><span><b>Playback speed</b> 0.5×, 0.75×, 1.0×, 1.25×, 1.5×, 2.0×</span></li>
+          <li><span class="cb">✓</span><span><b>Balance</b> and <b>Pre-amp</b> mini-sliders (double-click to reset)</span></li>
+          <li><span class="cb">✓</span><span><b>Output device selection</b> — switch headphones, speakers or DAC live, with automatic device recovery</span></li>
+          <li><span class="cb">✓</span><span><b>Stereo / Left / Right</b> routing plus <b>Channel Mapping</b> (BASSmix)</span></li>
+          <li><span class="cb">✓</span><span><b>A-B Repeat</b>, shuffle with history-aware previous, and Repeat Off / One / All</span></li>
+          <li><span class="cb">✓</span><span><b>Sleep timer</b>: by minutes, at a clock time, or after N tracks</span></li>
         </ul>
       </div>
 
       <div class="pane">
         <div>
-          <h4>Playlists that stay yours</h4>
-          <p class="desc">Standard formats in, standard formats out. Search your metadata and filenames to create a new playlist instantly.</p>
+          <h4>Shape your sound</h4>
+          <p class="desc">Real-time equalizer with presets that follow your music, and a live spectrum visualizer.</p>
         </div>
         <ul class="checks">
-          <li><span class="cb">✓</span>JSON-backed state management</li>
-          <li><span class="cb">✓</span>Save and load standard M3U playlists</li>
-          <li><span class="cb">✓</span>Export playlists directly to CSV and JSON formats</li>
-          <li><span class="cb">✓</span>Search by metadata &amp; filenames to generate instant new playlists</li>
+          <li><span class="cb">✓</span><span><b>8-band, 10-band and 15-band</b> layouts with real-time sliders</span></li>
+          <li><span class="cb">✓</span><span>Built-in presets (Rock, Pop, Classical, Bass Boost and more) in grouped categories</span></li>
+          <li><span class="cb">✓</span><span>Equalizer popup window, <b>Save Preset…</b> / <b>Load Preset…</b> to files, and one-click <b>Reset to Default</b></span></li>
+          <li><span class="cb">✓</span><span><b>Automatic preset selection</b> per track by genre or audio fingerprint, with manual override</span></li>
+          <li><span class="cb">✓</span><span>EQ state saved and restored between sessions</span></li>
+          <li><span class="cb">✓</span><span><b>FFT spectrum visualizer</b> with animated bars, NumPy-accelerated when available, toggled without interrupting playback</span></li>
         </ul>
       </div>
 
       <div class="pane">
         <div>
-          <h4>A tag editor built in</h4>
-          <p class="desc">Fix tags, swap covers, add lyrics and tidy filenames without leaving the player.</p>
+          <h4>Your library, organised</h4>
+          <p class="desc">Tabbed playlists stored in SQLite, with watch folders and fast search.</p>
         </div>
         <ul class="checks">
-          <li><span class="cb">✓</span>Edit audio metadata tags &amp; album art covers</li>
-          <li><span class="cb">✓</span>Embed and view synchronized or plain lyrics</li>
-          <li><span class="cb">✓</span>Batch rename media files based on metadata tags</li>
-          <li><span class="cb">✓</span>Safe local file management operations</li>
+          <li><span class="cb">✓</span><span>Unlimited <b>tabbed playlists</b> — create, rename, delete and reorder; drag and drop files and folders</span></li>
+          <li><span class="cb">✓</span><span><b>Favorites</b> tab that always stays first</span></li>
+          <li><span class="cb">✓</span><span><b>Watch Folders (Auto-Sync)</b> with on/off toggle and <b>missing-track detection</b></span></li>
+          <li><span class="cb">✓</span><span><b>Import Folder</b> with subfolders, or one tab per folder; load a folder or a <b>ZIP archive</b> (password supported)</span></li>
+          <li><span class="cb">✓</span><span>Import and export <b>M3U</b>; export track data as <b>CSV or JSON</b></span></li>
+          <li><span class="cb">✓</span><span><b>Undo / Redo</b> for playlist actions, automatic database backup and periodic autosave</span></li>
+          <li><span class="cb">✓</span><span>Per-playlist <b>shuffle and repeat</b> settings</span></li>
+          <li><span class="cb">✓</span><span><b>Real-time and global search</b> across title, artist and album, with flexible sorting</span></li>
         </ul>
       </div>
 
       <div class="pane">
         <div>
-          <h4>Fast, light, familiar</h4>
-          <p class="desc">A clean interface designed for quick interactions and a small system footprint.</p>
+          <h4>Tags, covers and lyrics</h4>
+          <p class="desc">Edit everything without leaving the player.</p>
         </div>
         <ul class="checks">
-          <li><span class="cb">✓</span>Clean, user-friendly UI/UX designed for fast interactions</li>
-          <li><span class="cb">✓</span>Keyboard-friendly shortcuts and controls</li>
-          <li><span class="cb">✓</span>Freeware software model</li>
-          <li><span class="cb">✓</span>Lightweight system footprint (low CPU &amp; RAM usage)</li>
+          <li><span class="cb">✓</span><span>Embedded <b>album art</b> display with folder-cover fallback, and a full-size cover viewer with save and replace</span></li>
+          <li><span class="cb">✓</span><span>Embed custom cover art into tags (MP3, FLAC)</span></li>
+          <li><span class="cb">✓</span><span><b>Track Properties</b> editor for title, artist, album, year, genre and track number</span></li>
+          <li><span class="cb">✓</span><span><b>Rename files from metadata</b>; view bitrate, sample rate, duration, size and codec</span></li>
+          <li><span class="cb">✓</span><span>Plain-text <b>lyrics</b> with adjustable font size, auto-scroll and overlay mode on the album art</span></li>
+          <li><span class="cb">✓</span><span><b>Embed lyrics</b> into tags (ID3 for MP3, FLAC metadata) and edit them in-app</span></li>
+          <li><span class="cb">✓</span><span>Faster loading through lazy metadata loading</span></li>
+        </ul>
+      </div>
+
+      <div class="pane">
+        <div>
+          <h4>Make it yours</h4>
+          <p class="desc">Switch themes live or drop in your own JSON palette.</p>
+          <div class="swatches"><span>Default</span><span>Midnight</span><span>Aurora</span><span>Amber Glow</span><span>Coral Dusk</span><span>Sunset</span></div>
+        </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span><span><b>Theme system</b> with a live Color Theme submenu</span></li>
+          <li><span class="cb">✓</span><span><b>Custom themes</b> as drop-in JSON in <code>palettes/</code>, with a template included</span></li>
+          <li><span class="cb">✓</span><span><b>Mini Player</b>, a small Winamp-style window used when the app is launched with a song</span></li>
+          <li><span class="cb">✓</span><span><b>Responsive layout</b> from compact to wide, and a floating playlist overlay mode</span></li>
+          <li><span class="cb">✓</span><span>Scrolling track title marquee and keyboard shortcuts for all major actions</span></li>
+        </ul>
+      </div>
+
+      <div class="pane">
+        <div>
+          <h4>At home on Windows</h4>
+          <p class="desc">Native taskbar controls and a session that picks up where you left off.</p>
+        </div>
+        <ul class="checks">
+          <li><span class="cb">✓</span><span><b>Taskbar thumbnail toolbar</b> with Play, Pause, Previous and Next, plus a taskbar progress bar</span></li>
+          <li><span class="cb">✓</span><span><b>Single instance</b> — opening files sends them to the running window</span></li>
+          <li><span class="cb">✓</span><span>Open files from the command line, or use <b>Open Disc</b> for removable and optical drives</span></li>
+          <li><span class="cb">✓</span><span>App data kept in <code>%APPDATA%\PotOMusiQT\</code>, safe to install in Program Files</span></li>
+          <li><span class="cb">✓</span><span><b>Session restore</b>: last track, position, volume, EQ, speed and playlist state</span></li>
+          <li><span class="cb">✓</span><span><b>Export / Import Settings</b> and <b>Reset Playback Preferences</b></span></li>
         </ul>
       </div>
     </div>
@@ -327,19 +460,48 @@
       <div class="dlg-body">
         <div class="dlg-ico">♪</div>
         <div>
-          <h3>Pot-O MusiQT v2.7.5</h3>
-          <p style="color:var(--muted);font-size:13.5px;margin-top:2px">Free offline music player for your desktop.</p>
+          <h3>Pot-O MusiQT v2.8.2 "Verse"</h3>
+          <p style="color:var(--muted);font-size:13.5px;margin-top:2px">Free offline music player for your Windows desktop.</p>
           <dl class="kv">
-            <dt>Version</dt><dd>2.7.5</dd>
+            <dt>Version</dt><dd>2.8.2 "Verse"</dd>
             <dt>License</dt><dd>Freeware</dd>
-            <dt>Built with</dt><dd>Python · PyQt5 (Qt)</dd>
+            <dt>Built with</dt><dd>Python · PyQt5 (Qt) · BASS</dd>
             <dt>Author</dt><dd>Muhammad Umar Hasyim Ashari</dd>
+            <dt>x64 SHA-256</dt><dd>e6f9075a81886297da9919e43b982ce3816e462d5ab8d10e95904bda9ce398e4</dd>
+            <dt>x86 SHA-256</dt><dd>af9d5245843e05295998afa55e05e2136130b05dcd7c963e05f6a06ec1bd701a</dd>
           </dl>
         </div>
       </div>
       <div class="dlg-foot">
         <a class="btn" href="https://github.com/umarhasyimas/Pot-O_MusiQT" target="_blank" rel="noopener noreferrer">View on GitHub</a>
-        <a class="btn primary" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/tag/v2.7.5" target="_blank" rel="noopener noreferrer">⬇ Download</a>
+        <div class="dl up right" data-dl>
+          <div class="dl-split">
+            <a class="dl-main" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x64.exe" rel="noopener noreferrer" style="padding:8px 16px">
+              <span class="arrow">⬇</span>
+              <span><span class="big" style="font-size:15px">Download</span><span class="small">Windows 64-bit</span></span>
+            </a>
+            <button class="dl-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Show other downloads"><span class="chev">▼</span></button>
+          </div>
+          <div class="dl-menu" role="menu">
+            <h6>Windows installer</h6>
+            <a role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x64.exe" rel="noopener noreferrer">
+              <span class="mi">x64</span><span class="mt"><b>Windows 64-bit</b><span>PotOMusiQT_Setup_2.8.2_x64.exe</span></span><span class="sz">45.8 MB</span>
+            </a>
+            <a role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/releases/download/v2.8.2/PotOMusiQT_Setup_2.8.2_x86.exe" rel="noopener noreferrer">
+              <span class="mi">x86</span><span class="mt"><b>Windows 32-bit</b><span>PotOMusiQT_Setup_2.8.2_x86.exe</span></span><span class="sz">39 MB</span>
+            </a>
+            <hr>
+            <a class="o" role="menuitem" href="https://sourceforge.net/projects/pot-o-musiqt/files/v2.8.2/" target="_blank" rel="noopener noreferrer">
+              <span class="mi">SF</span><span class="mt"><b>SourceForge mirror</b><span>Download from SourceForge</span></span>
+            </a>
+            <a class="g" role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/archive/refs/tags/v2.8.2.zip" rel="noopener noreferrer">
+              <span class="mi">ZIP</span><span class="mt"><b>Source code (zip)</b><span>v2.8.2</span></span>
+            </a>
+            <a class="g" role="menuitem" href="https://github.com/umarhasyimas/Pot-O_MusiQT/archive/refs/tags/v2.8.2.tar.gz" rel="noopener noreferrer">
+              <span class="mi">TAR</span><span class="mt"><b>Source code (tar.gz)</b><span>v2.8.2</span></span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -349,7 +511,7 @@
 <footer class="wrap">
   <div class="statusbar">
     <span><span class="dot">●</span> Ready</span>
-    <span>v2.7.5</span>
+    <span>v2.8.2 "Verse"</span>
     <span>Freeware</span>
     <span class="r">Built with Python &amp; PyQt5 · Hosted on Cloudflare Pages</span>
   </div>
@@ -361,6 +523,7 @@
 
 <script>
 (function(){
+  /* Tabs */
   var tabs=document.querySelectorAll(".tab"), panes=document.querySelectorAll(".pane");
   function showTab(i){
     tabs.forEach(function(t,k){t.classList.toggle("on",k===i);t.setAttribute("aria-selected",k===i)});
@@ -369,6 +532,34 @@
   tabs.forEach(function(t,i){
     t.addEventListener("click",function(){showTab(i)});
     t.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();showTab(i)}});
+  });
+
+  /* Download dropdowns */
+  var dls=document.querySelectorAll("[data-dl]");
+  function closeAll(except){
+    dls.forEach(function(d){
+      if(d!==except){d.classList.remove("open");d.querySelector(".dl-toggle").setAttribute("aria-expanded","false")}
+    });
+  }
+  dls.forEach(function(d){
+    var btn=d.querySelector(".dl-toggle");
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var open=!d.classList.contains("open");
+      closeAll(d);
+      d.classList.toggle("open",open);
+      btn.setAttribute("aria-expanded",open);
+      if(open){var first=d.querySelector(".dl-menu a");if(first&&e.detail===0)first.focus()}
+    });
+    d.querySelectorAll(".dl-menu a").forEach(function(a){
+      a.addEventListener("click",function(){closeAll()});
+    });
+  });
+  document.addEventListener("click",function(e){
+    if(!e.target.closest("[data-dl]"))closeAll();
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){closeAll()}
   });
 })();
 </script>
